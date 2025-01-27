@@ -25,3 +25,26 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/topics", () => {
+  test("200: Responds with an array of topic objects", () => {
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then((res) => {
+        const body = res.body;
+        expect(Array.isArray(body)).toBe(true)
+        expect(body.length).toBe(3);
+        expect(typeof body[0].slug).toBe("string")
+      });
+  });
+  test("404: Responds with 'Not Found' error if passed mispelled url", () => {
+    return request(app)
+      .get("/api/topic")
+      .expect(404)
+      .then((res) => {
+        expect(res.status).toBe(404)
+        expect(res.notFound).toBe(true)
+      });
+  });
+});
