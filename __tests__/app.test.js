@@ -33,9 +33,9 @@ describe("GET /api/topics", () => {
       .expect(200)
       .then((res) => {
         const body = res.body;
-        expect(Array.isArray(body)).toBe(true)
+        expect(Array.isArray(body)).toBe(true);
         expect(body.length).toBe(3);
-        expect(typeof body[0].slug).toBe("string")
+        expect(typeof body[0].slug).toBe("string");
       });
   });
   test("404: Responds with 'Not Found' error if passed mispelled url", () => {
@@ -43,8 +43,39 @@ describe("GET /api/topics", () => {
       .get("/api/topic")
       .expect(404)
       .then((res) => {
-        expect(res.status).toBe(404)
-        expect(res.notFound).toBe(true)
+        expect(res.status).toBe(404);
+        expect(res.notFound).toBe(true);
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id", () => {
+  test("200: Responds with article object from passed article ID", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then((res) => {
+        const body = res.body.article;
+        expect(typeof body).toBe("object");
+        expect(body.article_id).toBe(1)
+        expect(body.topic).toBe("mitch");
+      });
+  });
+  test("404: Responds with 'Not Found' error when given a valid but non existent ID", () => {
+    return request(app)
+      .get("/api/articles/999")
+      .expect(404)
+      .then((res) => {
+        const body = res.body
+        expect(body.msg).toBe("Not Found")
+      });
+  });
+  test("400: Responds with 'Bad Request' error when given an invalid ID", () => {
+    return request(app)
+      .get('/api/articles/not-an-id')
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Bad Request");
       });
   });
 });
