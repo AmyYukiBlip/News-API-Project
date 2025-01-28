@@ -74,7 +74,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.topic).toBe("mitch");
       });
   });
-  test("404: Responds with 'Not Found' error when given a valid but non existent ID", () => {
+  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
     return request(app)
       .get("/api/articles/999")
       .expect(404)
@@ -83,7 +83,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.error).toBe("Not Found");
       });
   });
-  test("400: Responds with 'Bad Request' error when given an invalid ID", () => {
+  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
     return request(app)
       .get("/api/articles/not-an-id")
       .expect(400)
@@ -129,6 +129,52 @@ describe("GET /api/articles", () => {
       .expect(400)
       .then((res) => {
         expect(res.status).toBe(400);
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Responds with an array of comments for the passed article_id", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((res) => {
+        const body = res.body;
+        expect(Array.isArray(body)).toBe(true);
+        expect(body[0].article_id).toBe(1);
+        expect(body[0]).toHaveProperty("comment_id");
+        expect(body[0]).toHaveProperty("votes");
+        expect(body[0]).toHaveProperty("created_at");
+        expect(body[0]).toHaveProperty("author");
+        expect(body[0]).toHaveProperty("body");
+        expect(body[0]).toHaveProperty("article_id");
+      });
+  });
+  test("200: Responds with an array of comments default sorted by created_at (date) order desc", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then((res) => {
+        const body = res.body;
+        expect(body).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+    return request(app)
+      .get("/api/articles/999/comments")
+      .expect(404)
+      .then((res) => {
+        expect(res.status).toBe(404);
+      });
+  });
+  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+    return request(app)
+      .get("/api/articles/not_id/comments")
+      .expect(400)
+      .then((res) => {
+        expect(res.body.error).toBe("Bad Request");
       });
   });
 });
