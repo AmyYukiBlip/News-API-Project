@@ -6,6 +6,18 @@ function fetchTopics() {
   });
 }
 
+function fetchAllArticles(queries){
+  const sort_by = queries.sort_by
+  const order = queries.order.toUpperCase()
+  return db.query(`SELECT 
+    article_id, title, topic, author, created_at, votes, article_img_url 
+    FROM articles 
+    ORDER BY ${sort_by} ${order}`)
+  .then((res) => {
+    return res.rows
+  })
+}
+
 function fetchArticle(article_id) {
   return db
     .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
@@ -18,4 +30,4 @@ function fetchArticle(article_id) {
     
 }
 
-module.exports = { fetchTopics, fetchArticle };
+module.exports = { fetchTopics, fetchAllArticles, fetchArticle };

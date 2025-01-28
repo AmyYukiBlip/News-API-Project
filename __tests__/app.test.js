@@ -15,6 +15,27 @@ afterAll(() => {
   return db.end();
 });
 
+describe("*", () => {
+  test("404: Responds with 'Not Found' error if passed mispelled urls", () => {
+    return request(app)
+      .get("/api/topic")
+      .expect(404)
+      .then((res) => {
+        expect(res.status).toBe(404);
+        expect(res.notFound).toBe(true);
+      });
+  });
+  test("404: Responds with 'Not Found' error if passed non existent urls", () => {
+    return request(app)
+      .get("/api/nothere")
+      .expect(404)
+      .then((res) => {
+        expect(res.status).toBe(404);
+        expect(res.notFound).toBe(true);
+      });
+  });
+});
+
 describe("GET /api", () => {
   test("200: Responds with an object detailing the documentation for each endpoint", () => {
     return request(app)
@@ -35,16 +56,8 @@ describe("GET /api/topics", () => {
         const body = res.body;
         expect(Array.isArray(body)).toBe(true);
         expect(body.length).toBe(3);
+        expect(typeof body[0].description).toBe("string");
         expect(typeof body[0].slug).toBe("string");
-      });
-  });
-  test("404: Responds with 'Not Found' error if passed mispelled url", () => {
-    return request(app)
-      .get("/api/topic")
-      .expect(404)
-      .then((res) => {
-        expect(res.status).toBe(404);
-        expect(res.notFound).toBe(true);
       });
   });
 });
@@ -57,7 +70,7 @@ describe("GET /api/articles/:article_id", () => {
       .then((res) => {
         const body = res.body.article;
         expect(typeof body).toBe("object");
-        expect(body.article_id).toBe(1)
+        expect(body.article_id).toBe(1);
         expect(body.topic).toBe("mitch");
       });
   });
@@ -66,16 +79,56 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/999")
       .expect(404)
       .then((res) => {
-        const body = res.body
-        expect(body.msg).toBe("Not Found")
+        const body = res.body;
+        expect(body.error).toBe("Not Found");
       });
   });
   test("400: Responds with 'Bad Request' error when given an invalid ID", () => {
     return request(app)
-      .get('/api/articles/not-an-id')
+      .get("/api/articles/not-an-id")
       .expect(400)
       .then((res) => {
-        expect(res.body.msg).toBe("Bad Request");
+        expect(res.body.error).toBe("Bad Request");
+      });
+  });
+});
+
+describe("GET /api/articles", () => {
+  test("200: Responds with an array of all article objects", () => {
+    return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200)
+      .then((res) => {
+        const body = res.body.articles;
+        expect(Array.isArray(body)).toBe(true);
+      });
+  });
+  test("200: Responds with all article properties EXCEPT body", () => {
+    return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200)
+      .then((res) => {
+        const body = res.body;
+        expect(body).not.toHaveProperty("body");
+      });
+  });
+  test("200: Responds with all articles sorted by created_at (date) order desc", () => {
+    return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200)
+      .then((res) => {
+        const body = res.body.articles;
+        expect(body).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  test("400: Responds with 'Bad Request' for invalid sort_by input", () => {
+    return request(app)
+      .get("/api/articles?sort_by=not_here&order=desc")
+      .expect(400)
+      .then((res) => {
+        expect(res.status).toBe(400);
       });
   });
 });
