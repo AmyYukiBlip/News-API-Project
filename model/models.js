@@ -11,9 +11,18 @@ function fetchAllArticles(queries) {
   const order = queries.order.toUpperCase();
   return db
     .query(
-      `SELECT 
-    article_id, title, topic, author, created_at, votes, article_img_url 
-    FROM articles 
+    `SELECT 
+    articles.article_id, 
+    articles.title, 
+    articles.topic, 
+    articles.author, 
+    articles.created_at, 
+    articles.votes, 
+    articles.article_img_url, 
+    COUNT(comments.article_id)::INT AS comment_count
+    FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
+    GROUP BY articles.article_id
     ORDER BY ${sort_by} ${order}`
     )
     .then((res) => {
@@ -33,12 +42,15 @@ function fetchArticle(article_id) {
 
 function fetchArticleComments(article_id) {
   return db
-  .query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC;`, [article_id])
-  .then(({rows}) => {
-    if (rows.length === 0) {
-      return Promise.reject("Not Found")
-    } else return rows
-    })
+    .query(
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC;`,
+      [article_id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject("Not Found");
+      } else return rows;
+    });
 }
 
 module.exports = {
