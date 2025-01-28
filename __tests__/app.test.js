@@ -103,13 +103,33 @@ describe("GET /api/articles", () => {
         expect(Array.isArray(body)).toBe(true);
       });
   });
+  test("200: Responds with new comment_count property which is total count of all the comments with the same article_id", () => {
+    return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200)
+      .then((res) => {
+        const body = res.body.articles;
+        expect(body[0]).toHaveProperty("comment_count");
+      });
+  });
   test("200: Responds with all article properties EXCEPT body", () => {
     return request(app)
       .get("/api/articles?sort_by=created_at&order=desc")
       .expect(200)
       .then((res) => {
-        const body = res.body;
-        expect(body).not.toHaveProperty("body");
+        const body = res.body.articles;
+        body.forEach((article) => {
+          expect(article).toMatchObject({
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
       });
   });
   test("200: Responds with all articles sorted by created_at (date) order desc", () => {
