@@ -1,15 +1,29 @@
-const { fetchTopics, fetchArticle } = require("../model/models");
+const {
+  fetchTopics,
+  fetchAllArticles,
+  fetchArticle,
+} = require("../model/models");
 const endpoints = require("../endpoints.json");
 
-function getEndpointsJson(req, res){
-        res.status(200).send({endpoints});
-};
-
+function getEndpointsJson(req, res) {
+  res.status(200).send({ endpoints });
+}
 
 function getTopics(req, res, next) {
   fetchTopics(req)
     .then((topics) => {
       res.status(200).send(topics);
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
+function getArticles(req, res, next) {
+  const queries = req.query;
+  fetchAllArticles(queries)
+    .then((articles) => {
+      res.status(200).send({ articles });
     })
     .catch((err) => {
       next(err);
@@ -27,4 +41,4 @@ function getArticleById(req, res, next) {
     });
 }
 
-module.exports = { getEndpointsJson, getTopics, getArticleById };
+module.exports = { getEndpointsJson, getTopics, getArticles, getArticleById };
