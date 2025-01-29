@@ -6,6 +6,7 @@ const {
   addComment,
   updateVotes,
   deleteCommentByCommentID,
+  fetchUsers,
 } = require("../model/models");
 const endpoints = require("../endpoints.json");
 
@@ -91,6 +92,16 @@ function deleteComment(req, res, next){
   })
 }
 
+function getUsers(req, res, next) {
+  fetchUsers()
+    .then((user) => {
+      res.status(200).send({users: user});
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
 
 module.exports = {
   getEndpointsJson,
@@ -101,4 +112,5 @@ module.exports = {
   postComment,
   patchVote,
   deleteComment,
+  getUsers,
 };

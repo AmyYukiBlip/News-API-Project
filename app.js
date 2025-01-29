@@ -9,6 +9,7 @@ const {
   postComment,
   patchVote,
   deleteComment,
+  getUsers,
 } = require("./controller/controllers");
 
 app.use(express.json());
@@ -24,6 +25,8 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getArticleComments);
+
+app.get("/api/users", getUsers);
 
 // POST requests
 
