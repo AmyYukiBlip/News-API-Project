@@ -18,7 +18,7 @@ afterAll(() => {
 describe("all *", () => {
   test("404: Responds with 'Not Found' error if passed mispelled urls", () => {
     return request(app)
-      .get("/api/topic")
+      .get("/api/t0pic")
       .expect(404)
       .then((res) => {
         expect(res.notFound).toBe(true);
@@ -208,7 +208,7 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
-  test("200: Responds with posted comment", () => {
+  test("201: Responds with posted comment", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -235,7 +235,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(res.text).toBe("Bad Request");
       });
   });
-  test("404: Responds with 'Not Found' when submitting a comment where usename doesn't exist", () => {
+  test("404: Responds with 'Not Found' when submitting a comment where username doesn't exist", () => {
     return request(app)
       .post("/api/articles/1/comments")
       .send({
@@ -245,6 +245,66 @@ describe("POST /api/articles/:article_id/comments", () => {
       .expect(404)
       .then((res) => {
         expect(res.body.error).toBe("Not Found");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: Responds with updated + vote on article based on article_id", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({
+        inc_votes: 1
+      })
+      .expect(200)
+      .then((res) => {
+        const body = res.body.articles[0];
+        expect(body.votes).toBe(101);
+      });
+  });
+  test("200: Responds with updated - vote on article based on article_id", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({
+        inc_votes: -100
+      })
+      .expect(200)
+      .then((res) => {
+        const body = res.body.articles[0];
+        expect(body.votes).toBe(-100);
+      });
+  });
+  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+    return request(app)
+      .patch("/api/articles/999")
+      .send({
+        inc_votes: 1
+      })
+      .expect(404)
+      .then((res) => {
+        expect(res.body.error).toBe("Not Found");
+      });
+  });
+  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+    return request(app)
+      .patch("/api/articles/not-an-id")
+      .send({
+        inc_votes: 1
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body.error).toBe("Bad Request");
+      });
+  });
+  test("400: Responds with 'Bad Request' when vote is not a valid number", () => {
+    return request(app)
+    .patch("/api/articles/2")
+    .send({
+      inc_votes: "not-a-vote"
+    })
+    .expect(400)
+      .then((res) => {
+        expect(res.body.error).toBe("Bad Request");
       });
   });
 });

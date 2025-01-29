@@ -6,7 +6,8 @@ const {
   getArticles,
   getArticleById,
   getArticleComments,
-  postComment
+  postComment,
+  patchVote,
 } = require("./controller/controllers");
 
 app.use(express.json());
@@ -27,17 +28,21 @@ app.get("/api/articles/:article_id/comments", getArticleComments);
 
 app.post("/api/articles/:article_id/comments", postComment);
 
+// PATCH requests
+
+app.patch("/api/articles/:article_id", patchVote);
+
 // ** error handling middleware ** //
 
 // non existent endpoint catchall
-app.all("*", (req, res, next) => { 
-    res.status(404).send({ error: "Path Not Found" });
+app.all("*", (req, res, next) => {
+  res.status(404).send({ error: "Path Not Found" });
 });
 
 // forced error message catchall
 app.use((err, req, res, next) => {
   if (err.status) {
-    res.status(err.status).send(err.error );
+    res.status(err.status).send(err.error);
   } else {
     next(err);
   }
@@ -60,8 +65,8 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err);
   console.log(err, "<< Error not handled yet");
+  if (err);
   res.status(500).send({ error: "Internal Server Error" });
 });
 

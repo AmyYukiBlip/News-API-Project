@@ -52,15 +52,16 @@ function fetchArticleComments(article_id) {
       } else return rows;
     });
 }
-// inserting based on article id
+
 function addComment(newComment, article_id) {
   const { username, body } = newComment;
   if (body === "") {
-    return Promise.reject({status: 400, error: "Bad Request"});
+    return Promise.reject({ status: 400, error: "Bad Request" });
   }
   return db
     .query(
-      `INSERT INTO comments (body, author, article_id)
+      `
+    INSERT INTO comments (body, author, article_id)
     VALUES ($1, $2, $3)
     RETURNING *;`,
       [body, username, article_id]
@@ -70,10 +71,43 @@ function addComment(newComment, article_id) {
     });
 }
 
+function updateVotes(newVote, article_id) {
+  // return the article from the DB to get current vote num
+  return (
+    db
+      .query(
+        `SELECT votes FROM articles
+        WHERE article_id = $1;`,
+        [article_id]
+      )
+      // calculate from incoming patch - increase or decrease current vote totalling new number
+      .then(({ rows }) => {
+        const currentVote = rows[0].votes;
+        if (newVote === 0) {
+          return Promise.reject({ status: 400, error: "Bad Request" });
+        } else {
+          const updatedVote = currentVote + newVote;
+          // insert new num into db with UPDATE
+          return db.query(
+            `UPDATE articles 
+          SET votes = $1
+          WHERE article_id = $2
+          RETURNING *;`,
+            [updatedVote, article_id]
+          );
+        }
+      })
+      .then(({ rows }) => {
+        return rows;
+      })
+  );
+}
+
 module.exports = {
   fetchTopics,
   fetchAllArticles,
   fetchArticle,
   fetchArticleComments,
   addComment,
+  updateVotes,
 };
