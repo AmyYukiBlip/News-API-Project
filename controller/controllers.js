@@ -4,6 +4,7 @@ const {
   fetchArticle,
   fetchArticleComments,
   addComment,
+  updateVotes,
 } = require("../model/models");
 const endpoints = require("../endpoints.json");
 
@@ -14,7 +15,7 @@ function getEndpointsJson(req, res) {
 function getTopics(req, res, next) {
   fetchTopics(req)
     .then((topic) => {
-      res.status(200).send({topics:topic});
+      res.status(200).send({ topics: topic });
     })
     .catch((err) => {
       next(err);
@@ -66,6 +67,18 @@ function postComment(req, res, next) {
     });
 }
 
+function patchVote(req, res, next) {
+  const newVote = req.body.inc_votes;
+  const { article_id } = req.params;
+  updateVotes(newVote, article_id)
+    .then((votedArticle) => {
+      res.status(200).send({ articles: votedArticle });
+    })  
+    .catch((err) => {
+      next(err);
+    });
+}
+
 module.exports = {
   getEndpointsJson,
   getTopics,
@@ -73,4 +86,5 @@ module.exports = {
   getArticleById,
   getArticleComments,
   postComment,
+  patchVote,
 };
