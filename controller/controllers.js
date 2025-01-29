@@ -3,8 +3,10 @@ const {
   fetchAllArticles,
   fetchArticle,
   fetchArticleComments,
+  addComment,
 } = require("../model/models");
 const endpoints = require("../endpoints.json");
+const { response } = require("../app");
 
 function getEndpointsJson(req, res) {
   res.status(200).send({ endpoints });
@@ -53,10 +55,23 @@ function getArticleComments(req, res, next) {
     });
 }
 
+function postComment(req, res, next) {
+  const newComment = req.body;
+  const { article_id } = req.params;
+  addComment(newComment, article_id)
+    .then((comment) => {
+      res.status(201).send({ posted_comment: comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+}
+
 module.exports = {
   getEndpointsJson,
   getTopics,
   getArticles,
   getArticleById,
   getArticleComments,
+  postComment,
 };
