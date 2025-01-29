@@ -103,6 +103,22 @@ function updateVotes(newVote, article_id) {
   );
 }
 
+function deleteCommentByCommentID(comment_id) {
+  // use sql DELETE to remove matching rows from a table
+  // do not return content - it will return no.rows deleted though
+  return db
+    .query(
+      `DELETE FROM comments
+    WHERE comment_id = $1;`,
+      [comment_id]
+    )
+    .then((res) => {
+      if (res.rowCount === 1) {
+        return Promise.reject({ status: 204, error: "No Content" });
+      } 
+    });
+}
+
 module.exports = {
   fetchTopics,
   fetchAllArticles,
@@ -110,4 +126,5 @@ module.exports = {
   fetchArticleComments,
   addComment,
   updateVotes,
+  deleteCommentByCommentID,
 };

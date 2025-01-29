@@ -5,6 +5,7 @@ const {
   fetchArticleComments,
   addComment,
   updateVotes,
+  deleteCommentByCommentID,
 } = require("../model/models");
 const endpoints = require("../endpoints.json");
 
@@ -79,6 +80,18 @@ function patchVote(req, res, next) {
     });
 }
 
+function deleteComment(req, res, next){
+  const {comment_id} = req.params
+  deleteCommentByCommentID(comment_id)
+  .then((res) => {
+    res.status(204).send(res)
+  })
+  .catch((err)=>{
+    next(err);
+  })
+}
+
+
 module.exports = {
   getEndpointsJson,
   getTopics,
@@ -87,4 +100,5 @@ module.exports = {
   getArticleComments,
   postComment,
   patchVote,
+  deleteComment,
 };

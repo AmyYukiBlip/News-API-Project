@@ -254,7 +254,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/1")
       .send({
-        inc_votes: 1
+        inc_votes: 1,
       })
       .expect(200)
       .then((res) => {
@@ -266,7 +266,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/2")
       .send({
-        inc_votes: -100
+        inc_votes: -100,
       })
       .expect(200)
       .then((res) => {
@@ -278,7 +278,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/999")
       .send({
-        inc_votes: 1
+        inc_votes: 1,
       })
       .expect(404)
       .then((res) => {
@@ -289,7 +289,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/not-an-id")
       .send({
-        inc_votes: 1
+        inc_votes: 1,
       })
       .expect(400)
       .then((res) => {
@@ -298,11 +298,43 @@ describe("PATCH /api/articles/:article_id", () => {
   });
   test("400: Responds with 'Bad Request' when vote is not a valid number", () => {
     return request(app)
-    .patch("/api/articles/2")
-    .send({
-      inc_votes: "not-a-vote"
-    })
-    .expect(400)
+      .patch("/api/articles/2")
+      .send({
+        inc_votes: "not-a-vote",
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body.error).toBe("Bad Request");
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: Responds with status 204 and no content", () => {
+    return request(app)
+      .delete("/api/comments/2")
+      .expect(204)
+      .then((res) => {
+        expect(res.body).toEqual({});
+        return db
+          .query(`SELECT * FROM comments WHERE comment_id = 2;`)
+          .then((res) => {
+            expect(res.rows.length).toBe(0);
+          });
+      });
+  });
+  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+    return request(app)
+      .delete("/api/comments/9999")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.error).toBe("Not Found");
+      });
+  });
+  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+    return request(app)
+      .delete("/api/comments/not-an-id")
+      .expect(400)
       .then((res) => {
         expect(res.body.error).toBe("Bad Request");
       });
