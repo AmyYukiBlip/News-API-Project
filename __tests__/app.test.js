@@ -16,7 +16,7 @@ afterAll(() => {
 });
 
 describe("all *", () => {
-  test("404: Responds with 'Not Found' error if passed mispelled urls", () => {
+  test("404: Responds with 'Not Found' if passed mispelled urls", () => {
     return request(app)
       .get("/api/t0pic")
       .expect(404)
@@ -25,7 +25,7 @@ describe("all *", () => {
         expect(res.body.error).toBe("Path Not Found");
       });
   });
-  test("404: Responds with 'Not Found' error if passed non existent urls", () => {
+  test("404: Responds with 'Not Found' if passed non existent urls", () => {
     return request(app)
       .get("/api/nothere")
       .expect(404)
@@ -141,7 +141,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.topic).toBe("mitch");
       });
   });
-  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+  test("404: Responds with 'Not Found' when given a valid format but non existent article ID", () => {
     return request(app)
       .get("/api/articles/999")
       .expect(404)
@@ -149,7 +149,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(res.body.error).toBe("Not Found");
       });
   });
-  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+  test("400: Responds with 'Bad Request' when given an invalid article ID format", () => {
     return request(app)
       .get("/api/articles/not-an-id")
       .expect(400)
@@ -189,7 +189,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         });
       });
   });
-  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+  test("404: Responds with 'Not Found' when given a valid format but non existent article ID", () => {
     return request(app)
       .get("/api/articles/999/comments")
       .expect(404)
@@ -197,7 +197,7 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(res.body.error).toBe("Not Found");
       });
   });
-  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+  test("400: Responds with 'Bad Request' when given an invalid article ID format", () => {
     return request(app)
       .get("/api/articles/not_id/comments")
       .expect(400)
@@ -218,6 +218,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .expect(201)
       .then((res) => {
         const body = res.body.posted_comment[0];
+        expect(body.comment_id).toBe(19);
         expect(body.body).toBe("One test comment to rule them all");
         expect(body.author).toBe("butter_bridge");
       });
@@ -247,6 +248,30 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(res.body.error).toBe("Not Found");
       });
   });
+  test("404: Responds with 'Not Found' when given a valid format but non existent article ID", () => {
+    return request(app)
+      .post("/api/articles/9999/comments")
+      .send({
+        username: "butter_bridge",
+        body: "Ooh who am I",
+      })
+      .expect(404)
+      .then((res) => {
+        expect(res.body.error).toBe("Not Found");
+      });
+  });
+  test("400: Responds with 'Bad Request' when given an invalid article ID format", () => {
+    return request(app)
+      .post("/api/articles/not_an_id/comments")
+      .send({
+        username: "butter_bridge",
+        body: "Ooh who am I",
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body.error).toBe("Bad Request");
+      });
+  });
 });
 
 describe("PATCH /api/articles/:article_id", () => {
@@ -274,7 +299,7 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(body.votes).toBe(-100);
       });
   });
-  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+  test("404: Responds with 'Not Found' when given a valid format but non existent article ID", () => {
     return request(app)
       .patch("/api/articles/999")
       .send({
@@ -285,7 +310,7 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(res.body.error).toBe("Not Found");
       });
   });
-  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+  test("400: Responds with 'Bad Request' when given an invalid article ID format", () => {
     return request(app)
       .patch("/api/articles/not-an-id")
       .send({
@@ -323,7 +348,7 @@ describe("DELETE /api/comments/:comment_id", () => {
           });
       });
   });
-  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+  test("404: Responds with 'Not Found' when given a valid format but non existent comment ID", () => {
     return request(app)
       .delete("/api/comments/9999")
       .expect(404)
@@ -331,7 +356,7 @@ describe("DELETE /api/comments/:comment_id", () => {
         expect(res.body.error).toBe("Not Found");
       });
   });
-  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+  test("400: Responds with 'Bad Request' when given an invalid comment ID format", () => {
     return request(app)
       .delete("/api/comments/not-an-id")
       .expect(400)

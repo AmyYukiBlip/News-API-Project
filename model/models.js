@@ -58,6 +58,9 @@ function addComment(newComment, article_id) {
   if (body === "") {
     return Promise.reject({ status: 400, error: "Bad Request" });
   }
+  if (!username || !article_id){
+    return Promise.reject("Not Found") ;
+  }
   return db
     .query(
       `
