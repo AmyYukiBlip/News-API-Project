@@ -8,6 +8,7 @@ const {
   getArticleComments,
   postComment,
   patchVote,
+  deleteComment,
 } = require("./controller/controllers");
 
 app.use(express.json());
@@ -31,6 +32,10 @@ app.post("/api/articles/:article_id/comments", postComment);
 // PATCH requests
 
 app.patch("/api/articles/:article_id", patchVote);
+
+// DELETE requests
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 // ** error handling middleware ** //
 
