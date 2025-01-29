@@ -6,7 +6,6 @@ const {
   addComment,
 } = require("../model/models");
 const endpoints = require("../endpoints.json");
-const { response } = require("../app");
 
 function getEndpointsJson(req, res) {
   res.status(200).send({ endpoints });
@@ -14,8 +13,8 @@ function getEndpointsJson(req, res) {
 
 function getTopics(req, res, next) {
   fetchTopics(req)
-    .then((topics) => {
-      res.status(200).send(topics);
+    .then((topic) => {
+      res.status(200).send({topics:topic});
     })
     .catch((err) => {
       next(err);
@@ -25,8 +24,8 @@ function getTopics(req, res, next) {
 function getArticles(req, res, next) {
   const queries = req.query;
   fetchAllArticles(queries)
-    .then((articles) => {
-      res.status(200).send({ articles });
+    .then((article) => {
+      res.status(200).send({ articles: article });
     })
     .catch((err) => {
       next(err);
@@ -37,7 +36,7 @@ function getArticleById(req, res, next) {
   const { article_id } = req.params;
   fetchArticle(article_id)
     .then((article) => {
-      res.status(200).send({ article });
+      res.status(200).send({ articles: article });
     })
     .catch((err) => {
       next(err);
@@ -47,8 +46,8 @@ function getArticleById(req, res, next) {
 function getArticleComments(req, res, next) {
   const { article_id } = req.params;
   fetchArticleComments(article_id)
-    .then((article) => {
-      res.status(200).send(article);
+    .then((comment) => {
+      res.status(200).send({ comments: comment });
     })
     .catch((err) => {
       next(err);

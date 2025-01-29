@@ -22,7 +22,7 @@ describe("all *", () => {
       .expect(404)
       .then((res) => {
         expect(res.notFound).toBe(true);
-        expect(res.body.error).toBe("Path Not Found")
+        expect(res.body.error).toBe("Path Not Found");
       });
   });
   test("404: Responds with 'Not Found' error if passed non existent urls", () => {
@@ -31,7 +31,7 @@ describe("all *", () => {
       .expect(404)
       .then((res) => {
         expect(res.notFound).toBe(true);
-        expect(res.body.error).toBe("Path Not Found")
+        expect(res.body.error).toBe("Path Not Found");
       });
   });
 });
@@ -53,41 +53,14 @@ describe("GET /api/topics", () => {
       .get("/api/topics")
       .expect(200)
       .then((res) => {
-        const body = res.body;
-        expect(Array.isArray(body)).toBe(true);
+        const body = res.body.topics;
         expect(body.length).toBe(3);
-        expect(typeof body[0].description).toBe("string");
-        expect(typeof body[0].slug).toBe("string");
-      });
-  });
-});
-
-describe("GET /api/articles/:article_id", () => {
-  test("200: Responds with article object from passed article ID", () => {
-    return request(app)
-      .get("/api/articles/1")
-      .expect(200)
-      .then((res) => {
-        const body = res.body.article;
-        expect(typeof body).toBe("object");
-        expect(body.article_id).toBe(1);
-        expect(body.topic).toBe("mitch");
-      });
-  });
-  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
-    return request(app)
-      .get("/api/articles/999")
-      .expect(404)
-      .then((res) => {
-        expect(res.body.error).toBe("Not Found");
-      });
-  });
-  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
-    return request(app)
-      .get("/api/articles/not-an-id")
-      .expect(400)
-      .then((res) => {
-        expect(res.body.error).toBe("Bad Request");
+        body.forEach((topic) => {
+          expect(topic).toMatchObject({
+            slug: expect.any(String),
+            description: expect.any(String),
+          });
+        });
       });
   });
 });
@@ -108,7 +81,11 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then((res) => {
         const body = res.body.articles;
-        expect(body[0]).toHaveProperty("comment_count");
+        body.forEach((article) => {
+          expect(article).toMatchObject({
+            comment_count: expect.any(Number),
+          });
+        });
       });
   });
   test("200: Responds with all article properties EXCEPT body", () => {
@@ -152,21 +129,53 @@ describe("GET /api/articles", () => {
   });
 });
 
+describe("GET /api/articles/:article_id", () => {
+  test("200: Responds with article object from passed article ID", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then((res) => {
+        const body = res.body.articles;
+        expect(typeof body).toBe("object");
+        expect(body.article_id).toBe(1);
+        expect(body.topic).toBe("mitch");
+      });
+  });
+  test("404: Responds with 'Not Found' error when given a valid format but non existent ID", () => {
+    return request(app)
+      .get("/api/articles/999")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.error).toBe("Not Found");
+      });
+  });
+  test("400: Responds with 'Bad Request' error when given an invalid ID format", () => {
+    return request(app)
+      .get("/api/articles/not-an-id")
+      .expect(400)
+      .then((res) => {
+        expect(res.body.error).toBe("Bad Request");
+      });
+  });
+});
+
 describe("GET /api/articles/:article_id/comments", () => {
   test("200: Responds with an array of comments for the passed article_id", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then((res) => {
-        const body = res.body;
-        expect(Array.isArray(body)).toBe(true);
-        expect(body[0].article_id).toBe(1);
-        expect(body[0]).toHaveProperty("comment_id");
-        expect(body[0]).toHaveProperty("votes");
-        expect(body[0]).toHaveProperty("created_at");
-        expect(body[0]).toHaveProperty("author");
-        expect(body[0]).toHaveProperty("body");
-        expect(body[0]).toHaveProperty("article_id");
+        const body = res.body.comments;
+        body.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            body: expect.any(String),
+            article_id: 1,
+            author: expect.any(String),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+          });
+        });
       });
   });
   test("200: Responds with an array of comments default sorted by created_at (date) order desc", () => {
@@ -174,7 +183,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then((res) => {
-        const body = res.body;
+        const body = res.body.comments;
         expect(body).toBeSortedBy("created_at", {
           descending: true,
         });
@@ -223,9 +232,9 @@ describe("POST /api/articles/:article_id/comments", () => {
       .expect(400)
       .then((res) => {
         expect(res.badRequest).toBe(true);
-        expect(res.text).toBe("Bad Request")
+        expect(res.text).toBe("Bad Request");
       });
-  });  
+  });
   test("404: Responds with 'Not Found' when submitting a comment where usename doesn't exist", () => {
     return request(app)
       .post("/api/articles/1/comments")
