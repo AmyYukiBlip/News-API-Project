@@ -7,27 +7,44 @@ function fetchTopics() {
 }
 
 function fetchAllArticles(queries) {
-  const sort_by = queries.sort_by;
-  const order = queries.order.toUpperCase();
-  return db
-    .query(
-      `SELECT 
-    articles.article_id, 
-    articles.title, 
-    articles.topic, 
-    articles.author, 
-    articles.created_at, 
-    articles.votes, 
-    articles.article_img_url, 
-    COUNT(comments.article_id)::INT AS comment_count
-    FROM articles
-    LEFT JOIN comments ON comments.article_id = articles.article_id
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order}`
-    )
-    .then((res) => {
-      return res.rows;
-    });
+  const sort_by = queries.sort_by || "created_at";
+  const order = queries.order || "desc";
+  // staring with base query
+  let SQLstring = `SELECT 
+  articles.article_id, 
+  articles.title, 
+  articles.topic, 
+  articles.author, 
+  articles.created_at, 
+  articles.votes, 
+  articles.article_img_url, 
+  COUNT(comments.article_id)::INT AS comment_count
+  FROM articles
+  LEFT JOIN comments ON comments.article_id = articles.article_id
+  GROUP BY articles.article_id`;
+  const args = [];
+  // building up arguments
+  if (sort_by) {
+    // greenlisted columns
+    const validColumnsToSortBy = ["author", "topic", "created_at"];
+    if (!validColumnsToSortBy.includes(sort_by)) {
+      return Promise.reject({ status: 400, error: "Bad Request" });
+    } else {
+      if (validColumnsToSortBy.includes(sort_by)) {
+        SQLstring += ` ORDER BY ${sort_by}`;
+      }
+    }
+    if (order !== "desc" && order !== "asc") {
+      return Promise.reject({ status: 400, error: "Bad Request" });
+    } else {
+      if (order === "desc" || order === "asc") {
+        SQLstring += " " + order;
+      }
+    }
+  }
+  return db.query(SQLstring, args).then(({ rows }) => {
+    return rows;
+  });
 }
 
 function fetchArticle(article_id) {
@@ -58,8 +75,8 @@ function addComment(newComment, article_id) {
   if (body === "") {
     return Promise.reject({ status: 400, error: "Bad Request" });
   }
-  if (!username || !article_id){
-    return Promise.reject("Not Found") ;
+  if (!username || !article_id) {
+    return Promise.reject("Not Found");
   }
   return db
     .query(
@@ -118,17 +135,20 @@ function deleteCommentByCommentID(comment_id) {
     .then((res) => {
       if (res.rowCount === 1) {
         return Promise.reject({ status: 204, error: "No Content" });
-      } 
+      }
     });
 }
 
 function fetchUsers() {
-  return db.query(`
+  return db
+    .query(
+      `
   SELECT * FROM users;
-  `)
-  .then(({rows})=>{
-  return rows
-  })
+  `
+    )
+    .then(({ rows }) => {
+      return rows;
+    });
 }
 
 module.exports = {
