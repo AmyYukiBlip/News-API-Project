@@ -481,6 +481,7 @@ describe("GET /api/users", () => {
       .expect(200)
       .then((res) => {
         const body = res.body.users;
+        expect(body.length).toBeGreaterThan(0)
         body.forEach((user) => {
           expect(user).toMatchObject({
             username: expect.any(String),
