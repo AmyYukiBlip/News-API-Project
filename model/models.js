@@ -42,7 +42,7 @@ function fetchAllArticles(queries) {
 
     if (sort_by) {
       // setting greenlisted columns
-      const validColumnsToSortBy = ["author", "topic", "created_at"];
+      const validColumnsToSortBy = ["title", "topic", "author", "created_at", "votes", "comment_count"];
       if (!validColumnsToSortBy.includes(sort_by)) {
         return Promise.reject({ status: 400, error: "Bad Request" });
       } else {

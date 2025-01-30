@@ -93,8 +93,8 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then((res) => {
-        const body = res.body.articles
-        expect(body.length).toBe(13)
+        const body = res.body.articles;
+        expect(body.length).toBe(13);
         body.forEach((article) => {
           expect(article).toMatchObject({
             article_id: expect.any(Number),
@@ -129,6 +129,17 @@ describe("GET /api/articles", () => {
           const body = res.body.articles;
           expect(body).toBeSortedBy("created_at", {
             descending: true,
+          });
+        });
+    });
+    test("200: Responds with an array of all articles sort_by created_at as DEFAULT but in order ASC from passed query", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then((res) => {
+          const body = res.body.articles;
+          expect(body).toBeSortedBy("created_at", {
+            descending: false,
           });
         });
     });
@@ -187,7 +198,7 @@ describe("GET /api/articles", () => {
     });
     test("400: Responds with 'Bad Request' when given a non greenlisted sort_by query", () => {
       return request(app)
-        .get("/api/articles?sort_by=title&order=asc")
+        .get("/api/articles?sort_by=not_in_my_list&order=asc")
         .expect(400)
         .then((res) => {
           expect(res.badRequest).toBe(true);
@@ -211,7 +222,7 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then((res) => {
           const body = res.body.articles;
-          expect(body.length).toBe(1)
+          expect(body.length).toBe(1);
           body.forEach((article) => {
             expect(article).toMatchObject({
               article_id: expect.any(Number),
@@ -481,7 +492,7 @@ describe("GET /api/users", () => {
       .expect(200)
       .then((res) => {
         const body = res.body.users;
-        expect(body.length).toBeGreaterThan(0)
+        expect(body.length).toBeGreaterThan(0);
         body.forEach((user) => {
           expect(user).toMatchObject({
             username: expect.any(String),

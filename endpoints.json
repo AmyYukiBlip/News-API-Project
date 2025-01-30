@@ -12,9 +12,12 @@
   "GET /api/articles": {
     "description": "serves an array of all articles",
     "queries": [
-      "author",
+      "title",
       "topic",
+      "author",
       "created_at",
+      "votes",
+      "comment_count",
       "sort_by",
       "order",
       "topicFilter"
