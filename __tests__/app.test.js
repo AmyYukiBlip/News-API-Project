@@ -93,7 +93,8 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then((res) => {
-        const body = res.body.articles;
+        const body = res.body.articles
+        expect(body.length).toBe(13)
         body.forEach((article) => {
           expect(article).toMatchObject({
             article_id: expect.any(Number),
@@ -199,6 +200,37 @@ describe("GET /api/articles", () => {
         .expect(400)
         .then((res) => {
           expect(res.badRequest).toBe(true);
+          expect(res.text).toBe("Bad Request");
+        });
+    });
+  });
+  describe("GET /api/articles (topic query)", () => {
+    test("200: Responds with an array of all articles filtered by passed topic query", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then((res) => {
+          const body = res.body.articles;
+          expect(body.length).toBe(1)
+          body.forEach((article) => {
+            expect(article).toMatchObject({
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: "cats",
+              author: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(Number),
+            });
+          });
+        });
+    });
+    test("400: Responds with 'Bad Request' for invalid topic input", () => {
+      return request(app)
+        .get("/api/articles?topic=miiiitch")
+        .expect(400)
+        .then((res) => {
           expect(res.text).toBe("Bad Request");
         });
     });

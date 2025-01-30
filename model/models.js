@@ -9,6 +9,9 @@ function fetchTopics() {
 function fetchAllArticles(queries) {
   const sort_by = queries.sort_by || "created_at";
   const order = queries.order || "desc";
+  const topicFilter = queries.topic; 
+  // { topic : 'cats' } so queries.topic / topicFilter = cats
+  
   // staring with base query
   let SQLstring = `SELECT 
   articles.article_id, 
@@ -20,30 +23,45 @@ function fetchAllArticles(queries) {
   articles.article_img_url, 
   COUNT(comments.article_id)::INT AS comment_count
   FROM articles
-  LEFT JOIN comments ON comments.article_id = articles.article_id
-  GROUP BY articles.article_id`;
+  LEFT JOIN comments ON comments.article_id = articles.article_id`;
   const args = [];
   // building up arguments
-  if (sort_by) {
-    // greenlisted columns
-    const validColumnsToSortBy = ["author", "topic", "created_at"];
-    if (!validColumnsToSortBy.includes(sort_by)) {
+
+  // finding topics to compare against
+  return db.query(`SELECT * FROM topics;`).then(({ rows }) => {
+    const articleTopicsArray = rows.map((topic) => topic.slug);
+    if (topicFilter && !articleTopicsArray.includes(topicFilter)) {
       return Promise.reject({ status: 400, error: "Bad Request" });
     } else {
-      if (validColumnsToSortBy.includes(sort_by)) {
-        SQLstring += ` ORDER BY ${sort_by}`;
+      if (articleTopicsArray.includes(topicFilter)) {
+        SQLstring += ` WHERE topic = '${topicFilter}'`;
       }
     }
-    if (order !== "desc" && order !== "asc") {
-      return Promise.reject({ status: 400, error: "Bad Request" });
-    } else {
-      if (order === "desc" || order === "asc") {
-        SQLstring += " " + order;
+
+    SQLstring += " GROUP BY articles.article_id";
+
+    if (sort_by) {
+      // setting greenlisted columns
+      const validColumnsToSortBy = ["author", "topic", "created_at"];
+      if (!validColumnsToSortBy.includes(sort_by)) {
+        return Promise.reject({ status: 400, error: "Bad Request" });
+      } else {
+        if (validColumnsToSortBy.includes(sort_by)) {
+          SQLstring += ` ORDER BY ${sort_by}`;
+        }
+      }
+      if (order !== "desc" && order !== "asc") {
+        return Promise.reject({ status: 400, error: "Bad Request" });
+      } else {
+        if (order === "desc" || order === "asc") {
+          SQLstring += " " + order;
+        }
       }
     }
-  }
-  return db.query(SQLstring, args).then(({ rows }) => {
-    return rows;
+
+    return db.query(SQLstring, args).then(({ rows }) => {
+      return rows;
+    });
   });
 }
 
