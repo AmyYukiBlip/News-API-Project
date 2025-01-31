@@ -237,12 +237,21 @@ describe("GET /api/articles", () => {
           });
         });
     });
-    test("400: Responds with 'Bad Request' for invalid topic input", () => {
+    test("200: Responds with an empty array when topic exists but has no associated articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then((res) => {
+          const body = res.body.articles;
+          expect(body.length).toBe(0);
+        });
+    });
+    test("404: Responds with 'Not Found' for invalid topic input", () => {
       return request(app)
         .get("/api/articles?topic=miiiitch")
-        .expect(400)
+        .expect(404)
         .then((res) => {
-          expect(res.text).toBe("Bad Request");
+          expect(res.text).toBe("Not Found");
         });
     });
   });

@@ -31,7 +31,7 @@ function fetchAllArticles(queries) {
   return db.query(`SELECT * FROM topics;`).then(({ rows }) => {
     const articleTopicsArray = rows.map((topic) => topic.slug);
     if (topicFilter && !articleTopicsArray.includes(topicFilter)) {
-      return Promise.reject({ status: 400, error: "Bad Request" });
+      return Promise.reject({ status: 404, error: "Not Found" });
     } else {
       if (articleTopicsArray.includes(topicFilter)) {
         SQLstring += ` WHERE topic = '${topicFilter}'`;
