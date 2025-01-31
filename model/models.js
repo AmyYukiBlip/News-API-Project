@@ -94,7 +94,7 @@ function fetchArticle(article_id) {
     )
     .then(({ rows }) => {
       if (rows.length === 0) {
-        return Promide.reject("Not Found");
+        return Promise.reject("Not Found");
       } else return rows[0];
     });
 }
