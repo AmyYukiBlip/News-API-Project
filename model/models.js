@@ -9,9 +9,9 @@ function fetchTopics() {
 function fetchAllArticles(queries) {
   const sort_by = queries.sort_by || "created_at";
   const order = queries.order || "desc";
-  const topicFilter = queries.topic; 
+  const topicFilter = queries.topic;
   // { topic : 'cats' } so queries.topic / topicFilter = cats
-  
+
   // staring with base query
   let SQLstring = `SELECT 
   articles.article_id, 
@@ -42,7 +42,14 @@ function fetchAllArticles(queries) {
 
     if (sort_by) {
       // setting greenlisted columns
-      const validColumnsToSortBy = ["title", "topic", "author", "created_at", "votes", "comment_count"];
+      const validColumnsToSortBy = [
+        "title",
+        "topic",
+        "author",
+        "created_at",
+        "votes",
+        "comment_count",
+      ];
       if (!validColumnsToSortBy.includes(sort_by)) {
         return Promise.reject({ status: 400, error: "Bad Request" });
       } else {
@@ -67,10 +74,27 @@ function fetchAllArticles(queries) {
 
 function fetchArticle(article_id) {
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
+    .query(
+      `
+  SELECT 
+  articles.article_id, 
+  articles.title, 
+  articles.topic, 
+  articles.author, 
+  articles.created_at, 
+  articles.votes, 
+  articles.article_img_url, 
+  COUNT(comments.article_id)::INT AS comment_count
+  FROM articles
+  LEFT JOIN comments ON comments.article_id = articles.article_id
+  WHERE articles.article_id = $1
+  GROUP BY articles.article_id;
+  `,
+      [article_id]
+    )
     .then(({ rows }) => {
       if (rows.length === 0) {
-        return Promise.reject("Not Found");
+        return Promide.reject("Not Found");
       } else return rows[0];
     });
 }
