@@ -276,6 +276,20 @@ describe("GET /api/articles/:article_id", () => {
         expect(res.body.error).toBe("Bad Request");
       });
   });
+  describe("GET /api/articles/:article_id (comment_count)", () => {
+    test("200: Responds with comment_count included in article object from passed article ID", () => {
+      return request(app)
+        .get("/api/articles/3")
+        .expect(200)
+        .then((res) => {
+          const body = res.body.articles;
+          expect(typeof body).toBe("object");
+          expect(body.article_id).toBe(3);
+          expect(body.topic).toBe("mitch");
+          expect(body.comment_count).toBe(2);
+        });
+    });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
